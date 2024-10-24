@@ -10,6 +10,23 @@ The extension will be integrated with public vulnerability databases to automati
 - **Web Technology Detection**: Identify the technologies used by websites, including front-end and back-end frameworks, CMS platforms, and server configurations.
 - **Vulnerability Analysis**: Check the detected technologies against public vulnerability databases (e.g., CVE, NVD) to find associated vulnerabilities.
 - **Real-time Security Monitoring**: Analyze websites in real time and display detected security issues directly in the extension.
+
+## File Structure
+```
+my-extension/
+│
+├── manifest.json         // 扩展的配置文件
+├── background.js         // 后台脚本，处理URL、HTTP headers 和 数据逻辑
+├── content_script.js     // 页面内容脚本，分析HTML内容
+├── popup.html            // 弹出窗口的用户界面
+├── popup.js              // 控制弹出窗口中如何显示分析结果
+├── css/
+│   └── style.css         // 样式文件，控制页面展示的样式
+└── img/
+    ├── icon16.png        // 16x16 图标
+    ├── icon48.png        // 48x48 图标
+    └── icon128.png       // 128x128 图标
+```
   
 ## Proposed Methodology and Approach
 
