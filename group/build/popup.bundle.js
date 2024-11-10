@@ -1,0 +1,1 @@
+document.addEventListener("DOMContentLoaded",(function(){chrome.storage.sync.get(null,(function(n){console.log(n)}))}));

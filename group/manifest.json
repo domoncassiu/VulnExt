@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "3unshine Tech Scanner",
+    "version": "1.0",
+    "description": "A tech scanner for vulnerability detection.",
+    "permissions": ["storage", "tabs"],
+    "action": {
+      "default_popup": "src/html/popup.html",
+      "default_icon": "src/img/logo.jpg"
+    },
+    "background": {
+      "service_worker": "background.js"
+    },
+    "options_page": "build/options.html"
+  }
+  
