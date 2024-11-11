@@ -11,6 +11,6 @@
     "background": {
       "service_worker": "background.js"
     },
-    "options_page": "build/options.html"
+    "options_page": "src/html/options.html"
   }
   
