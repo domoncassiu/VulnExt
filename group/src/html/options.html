@@ -2,17 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Options</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Options Table</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.22.8/antd.min.css" />
   <style>
-    /* 可以在这里添加自定义的 CSS */
+    #rules-table {
+      max-height: 240px;
+      overflow-y: auto;
+    }
+    .table-row {
+      display: flex;
+      padding: 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .table-cell {
+      flex: 1;
+      padding: 8px;
+      text-align: left;
+    }
+    .table-header {
+      background-color: #fafafa;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <h1>Rules</h1>
-  <div id="button-container"></div>
-  <div id="table-container"></div>
+  <div id="app">
+    <h1>Rules</h1>
+    <!-- <div style="margin-bottom: 16px;">
+      <button class="ant-btn ant-btn-primary">Enable All</button>
+      <button class="ant-btn">Disable All</button>
+      <button class="ant-btn ant-btn-danger">Delete All Rules</button>
+      <button class="ant-btn ant-btn-primary">Add Rule</button>
+    </div> -->
+    <div id="rules-table">
+      <div class="table-row table-header">
+        <div class="table-cell">Name</div>
+        <div class="table-cell">Description</div>
+        <div class="table-cell">URL</div>
+        <div class="table-cell">Risk</div>
+      </div>
+    </div>
+  </div>
 
-  <!-- 引入 options.js 文件 -->
   <script src="../js/options.js"></script>
 </body>
 </html>
+
