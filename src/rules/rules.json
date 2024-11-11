@@ -1,0 +1,19 @@
+[
+    {
+      "name": "TimThumb",
+      "uid": "1",
+      "enabled": true,
+      "description": "TimThumb thumbnail generators; may be vulnerable depending on version",
+      "url": "timthumb.php",
+      "risk": "medium"
+    },
+    {
+      "name": "phpMyAdmin Setup",
+      "uid": "2",
+      "enabled": true,
+      "description": "Accessible phpMyAdmin setup page",
+      "url": "phpmyadmin/scripts/setup.php",
+      "risk": "high"
+    }
+  ]
+  

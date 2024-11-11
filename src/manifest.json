@@ -1,34 +1,33 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
     "name": "VulnExt",
     "version": "1.0",
     "description": "Web Technology and Vulnerability Detection Browser Extension",
     "icons": {
-        "16": "path/to/16x16/icon.png",
-        "48": "path/to/48x48/icon.png",
-        "128": "path/to/128x128/icon.png"
     },
-    "browser_action": {
+    "action": {
         "default_icon": {
-            "16": "path/to/16x16/icon.png",
-            "48": "path/to/48x48/icon.png",
-            "128": "path/to/128x128/icon.png"
         },
-        "default_popup": "popup.html"
+        "default_popup": "html/popup.html"
     },
     "permissions": [
         "tabs",
-        "activeTab"
+        "activeTab",
+        "storage",
+        "webNavigation"
     ],
     "background": {
-        "scripts": [ "background.js"],
-        "persistent": false
+        "service_worker": "js/background/background.js"
     },
+    "web_accessible_resources": [{
+        "resources": ["rules/rules.json"],
+        "matches": ["<all_urls>"]
+    }],
     "content_scripts": [{
         "matches": ["*://*/*"],
-        "js": ["content_script.js"],
+        "js": ["js/content_script/content_script.js"],
         "css": ["css/style.css"],
         "run_at": "document_end"
     }],
-    "options_page": "options.html"
+    "options_page": "html/details.html"
 }
