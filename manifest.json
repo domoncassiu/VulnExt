@@ -1,33 +1,41 @@
 {
-    "manifest_version": 3,
-    "name": "3unshine Tech Scanner",
-    "version": "1.0",
-    "description": "A tech scanner for vulnerability detection.",
-    "permissions": [
-      "tabs",
-      "activeTab",
-      "storage",
-      "webNavigation"
-    ],
-    "action": {
-      "default_popup": "src/html/popup.html",
-      "default_icon": "src/img/logo.jpg"
-    },
-    "background": {
-      "service_worker": "src/js/background/background.js"
-    },
-    "web_accessible_resources": [{
-      "resources": ["rules/rules.json"],
-      "matches": ["<all_urls>"]
-    }],
-    "content_scripts": [{
-        "matches": ["*://*/*"],
-        "js": ["src/js/content_script/content_script.js"],
-        "run_at": "document_end"
-    }],
-    "options_page": "src/html/options.html"
-  }
-  
-
-
-  
+  "manifest_version": 3,
+  "name": "3unshine Tech Scanner",
+  "version": "1.0",
+  "description": "A tech scanner for vulnerability detection.",
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "storage",
+    "webNavigation"
+  ],
+  "action": {
+    "default_popup": "src/html/popup.html",
+    "default_icon": "src/img/logo.jpg"
+  },
+  "background": {
+    "service_worker": "src/js/background/background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "rules/rules.json"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*/*"
+      ],
+      "js": [
+        "src/js/content_script/content_script.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "options_page": "src/html/options.html"
+}
