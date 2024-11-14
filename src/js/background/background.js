@@ -235,7 +235,7 @@ async function removeUnworkedUrl(baseURL, rootNode) {
     for (let i = 0; i < currentSize; i++) {
       const { node } = pathQueue.dequeue();
       // const currentPath = path ? `${path}/${node.url || node.name}` : node.url || node.name; 
-      let path = node.url
+      let path = node.url.replace(/\/+$/, '');
       if (node instanceof PathNode) {
         const fullPath = `${baseURL}/${path}`;
 
