@@ -222,7 +222,7 @@ async function removeUnworkedUrl(baseURL, rootNode) {
   let pathQueue = new Queue();
   pathQueue.enqueue({ node: rootNode, path: "" }); // 初始路径为空字符串
 
-  let totalPaths = rootNode.paths.length + rootNode.files.length;
+  let totalPaths = rootNode.paths.length
   let checkedPaths = 0;
 
   while (!pathQueue.isEmpty()) {
@@ -278,23 +278,34 @@ async function removeUnworkedUrl(baseURL, rootNode) {
 
 
 
-async function isValidURL(baseURL, path) {
+async function isValidURL(baseURL, path, timeout = 5000) {
   const fullURL = `${baseURL}/${path}`;
+  const controller = new AbortController();
+  const signal = controller.signal;
+
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
   try {
-    const response = await fetch(fullURL, { method: "HEAD" });
-    
+    const response = await fetch(fullURL, { method: "HEAD", signal });
+    clearTimeout(timeoutId); 
+
     if (response.ok || response.status === 403) {
       console.log(`ok ${fullURL}: ${response.status}`);
-      return true; 
+      return true;
     } else {
       console.log(`not ok ${fullURL}: ${response.status}`);
-      return false; 
+      return false;
     }
   } catch (error) {
-    console.error(`Error checking ${fullURL}:`, error);
+    if (error.name === 'AbortError') {
+      console.error(`Request timed out for ${fullURL}`);
+    } else {
+      console.error(`Error checking ${fullURL}:`, error);
+    }
     return false;
   }
 }
+
 
 
 
