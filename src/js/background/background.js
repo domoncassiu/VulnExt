@@ -8,6 +8,7 @@ class FileNode {
       this.description=description;
       this.risk=risk;
       this.type = "file";
+      this.url = "";
   }
 
   toJSON() {
@@ -232,11 +233,11 @@ async function removeUnworkedUrl(baseURL, rootNode) {
     const currentSize = pathQueue.size();
 
     for (let i = 0; i < currentSize; i++) {
-      const { node, path } = pathQueue.dequeue();
-      const currentPath = path ? `${path}/${node.url || node.name}` : node.url || node.name; 
-
+      const { node } = pathQueue.dequeue();
+      // const currentPath = path ? `${path}/${node.url || node.name}` : node.url || node.name; 
+      let path = node.url
       if (node instanceof PathNode) {
-        const fullPath = `${baseURL}/${currentPath}`;
+        const fullPath = `${baseURL}/${path}`;
 
         chrome.runtime.sendMessage({
           action: "progressUpdate",
@@ -245,23 +246,24 @@ async function removeUnworkedUrl(baseURL, rootNode) {
         });
         checkedPaths++;
 
-        if (!await isValidURL(baseURL, currentPath)) {
+        if (!await isValidURL(baseURL, path)) {
           rootNode.removePathById(node.id); 
         } else {
           node.paths.forEach(childPathNode => {
-            childPathNode.url = `${currentPath}/${childPathNode.url}`;
-            pathQueue.enqueue({ node: childPathNode, path: currentPath });
+            childPathNode.url = `${path}/${childPathNode.url}`;
+            pathQueue.enqueue({ node: childPathNode });
             totalPaths++;
           });
 
           node.files.forEach(fileNode => {
-            pathQueue.enqueue({ node: fileNode, path: currentPath });
+            fileNode.url = `${path}/${fileNode.name}`;
+            pathQueue.enqueue({ node: fileNode});
             totalPaths++;
           });
         }
       } else if (node instanceof FileNode) {
-        const fileUrl = `${baseURL}/${currentPath}`;
-        const fileValid = await isValidURL(baseURL, currentPath);
+        const fileUrl = `${baseURL}/${path}`;
+        const fileValid = await isValidURL(baseURL, path);
 
         chrome.runtime.sendMessage({
           action: "progressUpdate",
