@@ -19,7 +19,8 @@ class FileNode {
           code: this.code,
           id: this.id,
           description: this.description,
-          risk: this.risk
+          risk: this.risk,
+          url: this.url
       };
   }
 }
