@@ -18,8 +18,10 @@ document.getElementById("checkUrlsButton").addEventListener("click", () => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "scanComplete") {
         const button = document.getElementById("checkUrlsButton");
+        const progressElement = document.getElementById("progressDisplay");
         button.disabled = false;
         button.textContent = "Finished";
+        progressElement.textContent = `scan complete`;
     }
 });
   

@@ -220,9 +220,9 @@ async function checkUrls(baseURL){
 
 async function removeUnworkedUrl(baseURL, rootNode) {
   let pathQueue = new Queue();
-  pathQueue.enqueue({ node: rootNode, path: "" }); // 初始路径为空字符串
+  pathQueue.enqueue({ node: rootNode, path: "" });
 
-  let totalPaths = rootNode.paths.length
+  let totalPaths = rootNode.paths.length + rootNode.files.length;
   let checkedPaths = 0;
 
   while (!pathQueue.isEmpty()) {
