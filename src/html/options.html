@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Options Table</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.22.8/antd.min.css" />
+  <script src="../lib/vis-network.min.js"></script>
   <style>
     #rules-table {
       max-height: 240px;
@@ -23,6 +24,11 @@
     .table-header {
       background-color: #fafafa;
       font-weight: bold;
+    }
+    #tree-container {
+      margin-top: 50px;
+      height: 1000px;
+      border: 1px solid #ddd;
     }
   </style>
 </head>
@@ -43,6 +49,8 @@
         <div class="table-cell">Risk</div>
       </div>
     </div>
+    <h2>Tree View</h2>
+    <div id="tree-container"></div>
   </div>
 
 
