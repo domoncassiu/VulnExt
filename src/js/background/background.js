@@ -1,8 +1,10 @@
 class FileNode {
+  static id = -1;
   constructor(name, source, id, description, risk) {
       this.name=name;
       this.source=source;
-      this.id=id;
+      this.code = id
+      this.id = FileNode.id--;
       this.description=description;
       this.risk=risk;
       this.type = "file";
@@ -13,6 +15,7 @@ class FileNode {
           type: "file",
           name: this.name,
           source: this.source,
+          code: this.code,
           id: this.id,
           description: this.description,
           risk: this.risk
@@ -57,6 +60,22 @@ class PathNode {
 
     return false;
   }
+
+  removeFileById(id) {
+    const fileIndex = this.files.findIndex(file => file.id === id);
+    if (fileIndex !== -1) {
+        this.files.splice(fileIndex, 1); 
+        return true; 
+    }
+
+    for (let path of this.paths) {
+        if (path.removeFileById(id)) {
+            return true; 
+        }
+    }
+
+    return false; 
+  }
   
   toJSON() {
       return {
@@ -100,7 +119,7 @@ class Queue {
 }
 
 function loadRules() {
-  fetch(chrome.runtime.getURL("src/rules/url_vulnerabilities.csv"))
+  fetch(chrome.runtime.getURL("src/rules/url_vulnerabilities_updated.csv"))
     .then(response => response.text())
     .then(csvText => {      
       const rows = csvText.trim().split("\n");       
@@ -199,38 +218,64 @@ async function checkUrls(baseURL){
   })
 }
 
-async function removeUnworkedUrl(baseURL, rootNode){
+async function removeUnworkedUrl(baseURL, rootNode) {
   let pathQueue = new Queue();
-  pathQueue.enqueue(rootNode.paths);
-  let totalPaths = rootNode.paths.length;
+  pathQueue.enqueue({ node: rootNode, path: "" }); // 初始路径为空字符串
+
+  let totalPaths = rootNode.paths.length + rootNode.files.length;
   let checkedPaths = 0;
-  while(!pathQueue.isEmpty()){
+
+  while (!pathQueue.isEmpty()) {
     const currentSize = pathQueue.size();
-    for(let i = 0; i<currentSize; i++){
-      let pathNode = pathQueue.dequeue();
-      const url = pathNode.url;
 
-      chrome.runtime.sendMessage({
-        action: "progressUpdate",
-        url: `${baseURL}/${url}`,
-        progress: `${checkedPaths + 1}/${totalPaths}`
-      });
-      checkedPaths++;
+    for (let i = 0; i < currentSize; i++) {
+      const { node, path } = pathQueue.dequeue();
+      const currentPath = path ? `${path}/${node.url || node.name}` : node.url || node.name; 
 
-      if(!await isValidURL(baseURL, url)){
-        rootNode.removePathById(pathNode.id);
-      }else{
-        if (pathNode.paths.length > 0) {
-          pathNode.paths.forEach(childPathNode => {
-            childPathNode.url = `${url}/${childPathNode.url}`;
-            pathQueue.enqueue(childPathNode);
-            totalPaths += 1;
+      if (node instanceof PathNode) {
+        const fullPath = `${baseURL}/${currentPath}`;
+
+        chrome.runtime.sendMessage({
+          action: "progressUpdate",
+          url: fullPath,
+          progress: `${checkedPaths + 1}/${totalPaths}`
+        });
+        checkedPaths++;
+
+        if (!await isValidURL(baseURL, currentPath)) {
+          rootNode.removePathById(node.id); 
+        } else {
+          node.paths.forEach(childPathNode => {
+            pathQueue.enqueue({ node: childPathNode, path: currentPath });
+            totalPaths++;
           });
+
+          node.files.forEach(fileNode => {
+            pathQueue.enqueue({ node: fileNode, path: currentPath });
+            totalPaths++;
+          });
+        }
+      } else if (node instanceof FileNode) {
+        const fileUrl = `${baseURL}/${currentPath}`;
+        const fileValid = await isValidURL(baseURL, currentPath);
+
+        chrome.runtime.sendMessage({
+          action: "progressUpdate",
+          url: fileUrl,
+          progress: `${checkedPaths + 1}/${totalPaths}`
+        });
+        checkedPaths++;
+
+        if (!fileValid) {
+          rootNode.removeFileById(node.id);
+
         }
       }
     }
   }
 }
+
+
 
 
 async function isValidURL(baseURL, path) {

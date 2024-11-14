@@ -55,6 +55,22 @@ class PathNode {
 
         return false;
     }
+
+    removeFileById(id) {
+        const fileIndex = this.files.findIndex(file => file.id === id);
+        if (fileIndex !== -1) {
+            this.files.splice(fileIndex, 1); 
+            return true; 
+        }
+
+        for (let path of this.paths) {
+            if (path.removeFileById(id)) {
+                return true; 
+            }
+        }
+
+        return false; 
+    }
     
     toJSON() {
         return {
