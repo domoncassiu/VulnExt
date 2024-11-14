@@ -249,6 +249,7 @@ async function removeUnworkedUrl(baseURL, rootNode) {
           rootNode.removePathById(node.id); 
         } else {
           node.paths.forEach(childPathNode => {
+            childPathNode.url = `${currentPath}/${childPathNode.url}`;
             pathQueue.enqueue({ node: childPathNode, path: currentPath });
             totalPaths++;
           });
