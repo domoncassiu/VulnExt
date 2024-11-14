@@ -215,6 +215,9 @@ async function checkUrls(baseURL){
     console.log("this is the tree after url removal");
     console.log(rootNode);
     chrome.runtime.sendMessage({ action: "scanComplete" });
+    chrome.storage.local.set({ rootNodeTree: rootNode.toJSON() }, () => {
+      console.log("rootNode has been saved to chrome.storage.local");
+    });
   })
 }
 

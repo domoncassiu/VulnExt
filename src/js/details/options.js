@@ -38,6 +38,7 @@ function populateTable(data) {
   });
 }
 
+
 populateTable(hardCodeData);
 
 chrome.storage.local.get(['matches'], (result) => {
@@ -52,3 +53,27 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     populateTable(changes.matches.newValue); 
   }
 });
+
+// load tree
+async function loadRootNodeFromStorage() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get("rootNodeTree", (data) => {
+      if (data.rootNodeTree) {
+        resolve(data.rootNodeTree);
+      } else {
+        reject("No rootNode found in chrome.storage.local.");
+      }
+    });
+  });
+}
+
+async function getRootNode() {
+  try {
+    const rootNode = await loadRootNodeFromStorage();
+    console.log("Loaded rootNode from chrome.storage.local:", rootNode);
+  } catch (error) {
+    console.warn(error);
+  }
+}
+
+getRootNode();
