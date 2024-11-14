@@ -134,7 +134,6 @@ function loadRules() {
       //TODO: remove these two lines if you dont need this data again
       console.log("this is the initial tree");
       console.log(rootNode.toJSON());
-      checkUrls();
     })
     .catch(error => console.error("Error loading CSV file:", error));
 }
@@ -184,36 +183,48 @@ function rebuildTree(nodeData, parent = null) {
   }
 }
 
-function checkUrls(){
-  chrome.storage.local.get("rules", function(data) {
+async function checkUrls(baseURL){
+  chrome.storage.local.get("rules", async function(data) {
     if (!data.rules) {
       console.warn("No rules found in storage");
       return;
     }
 
     const rootNode = rebuildTree(data.rules);
-    removeUnworkedUrl(rootNode);
+    await removeUnworkedUrl(baseURL, rootNode);
     //TODO: remove these two line if you dont need. it's printing all possible urls after removal
     console.log("this is the tree after url removal");
     console.log(rootNode);
+    chrome.runtime.sendMessage({ action: "scanComplete" });
   })
 }
 
-function removeUnworkedUrl(rootNode){
+async function removeUnworkedUrl(baseURL, rootNode){
   let pathQueue = new Queue();
   pathQueue.enqueue(rootNode.paths);
+  let totalPaths = rootNode.paths.length;
+  let checkedPaths = 0;
   while(!pathQueue.isEmpty()){
     const currentSize = pathQueue.size();
     for(let i = 0; i<currentSize; i++){
       let pathNode = pathQueue.dequeue();
       const url = pathNode.url;
-      if(!isValidURL(url)){
+
+      chrome.runtime.sendMessage({
+        action: "progressUpdate",
+        url: `${baseURL}/${url}`,
+        progress: `${checkedPaths + 1}/${totalPaths}`
+      });
+      checkedPaths++;
+
+      if(!await isValidURL(baseURL, url)){
         rootNode.removePathById(pathNode.id);
       }else{
         if (pathNode.paths.length > 0) {
           pathNode.paths.forEach(childPathNode => {
             childPathNode.url = `${url}/${childPathNode.url}`;
             pathQueue.enqueue(childPathNode);
+            totalPaths += 1;
           });
         }
       }
@@ -221,74 +232,51 @@ function removeUnworkedUrl(rootNode){
   }
 }
 
-function isValidURL(path){
-  // TODO: 这里的path是完整的后缀，你就拿网址+这个path就行
-  if(path==="misc/farbtastic"){ //TODO：这里我test用的 把这里删了就行。path ok就return true，不然就return false
+
+async function isValidURL(baseURL, path) {
+  const fullURL = `${baseURL}/${path}`;
+  try {
+    const response = await fetch(fullURL, { method: "HEAD" });
+    
+    if (response.ok || response.status === 403) {
+      console.log(`ok ${fullURL}: ${response.status}`);
+      return true; 
+    } else {
+      console.log(`not ok ${fullURL}: ${response.status}`);
+      return false; 
+    }
+  } catch (error) {
+    console.error(`Error checking ${fullURL}:`, error);
     return false;
   }
-  return true;
 }
 
-// Check if the specified baseURL has already been checked
-function checkRules(baseURL) {
-  // Retrieve the list of checked sites and rules
-  chrome.storage.local.get(["checkedSites", "rules"], function(data) {
-    const checkedSites = data.checkedSites || {};
-    const rules = data.rules || [];
-    
-    // If the baseURL has already been checked, skip the check
-    if (checkedSites[baseURL]) {
-      console.log(`Already checked: ${baseURL}`);
-      return;
-    }
 
-    // Otherwise, mark as checked and proceed with the check
-    checkedSites[baseURL] = true;
-    const matches = [];
-
-    // Iterate through the rules and create the full URL for each rule to check
-    const fetchPromises = rules.map(rule => {
-      const fullURL = `${baseURL}/${rule.url}`;
-      
-      // Use fetch to check if the path exists
-      return fetch(fullURL, { method: "HEAD" })
-        .then(response => {
-          if (response.ok) {
-            console.log(`Checked ${fullURL}: ${response.status}`);
-            // If the URL exists, add it to the matches array
-            matches.push({
-              name: rule.name,
-              description: rule.description,
-              url: fullURL,
-              risk: rule.risk
-            });
-          }else{
-            console.log(`Checked ${fullURL}: ${response.status}`);
-          }
-        })
-        .catch(error => {
-          console.error(`Error checking ${fullURL}:`, error);
-        });
-    });
-
-    // Once all requests are completed, store the results in storage and update checkedSites
-    Promise.all(fetchPromises).finally(() => {
-      chrome.storage.local.set({ matches: matches, checkedSites: checkedSites });
-    });
-  });
-}
 
 chrome.runtime.onInstalled.addListener(() => {
   loadRules();
   console.log("Extension installed, rules loaded");
 });
 
-// When a user navigates to a new page, get the baseURL and call checkRules
-chrome.webNavigation.onCompleted.addListener(function(details) {
-  if (details.frameId === 0) { // Only trigger for the main frame
-    console.log("Page load completed:", details.url);
-    const url = new URL(details.url);
-    const baseURL = url.origin; // Get only the protocol and hostname part
-    checkRules(baseURL);
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "checkUrls") {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+      const tab = tabs[0];
+      
+      if (tab.status === "complete") {
+        const url = new URL(tab.url);
+        const baseURL = url.origin; // Get only the protocol and hostname part
+        console.log("Base URL:", baseURL);
+        await checkUrls(baseURL);
+        sendResponse({ status: "checkUrls started" });
+      } else {
+        sendResponse({ status: "Page not fully loaded. Try again later." });
+      }
+    });
+
+    return true;
   }
 });
+
+
