@@ -1,45 +1,53 @@
-const hardCodeData = [{name:'MM',description:'hahah',url:'https://mm.com',risk:'HIGH'},
-{name:'PP',description:'hahah',url:'https://pp.com',risk:'LOW'},
-{name:'FF',description:'hahah',url:'https://ff.com',risk:'NOT IMPORTANT'},
-{name:'MM',description:'hahah',url:'https://mm.com',risk:'HIGH'},
-{name:'PP',description:'hahah',url:'https://pp.com',risk:'LOW'},
-{name:'FF',description:'hahah',url:'https://ff.com',risk:'NOT IMPORTANT'},
-{name:'MM',description:'hahah',url:'https://mm.com',risk:'HIGH'},
-{name:'PP',description:'hahah',url:'https://pp.com',risk:'LOW'},
-{name:'FF',description:'hahah',url:'https://ff.com',risk:'NOT IMPORTANT'},
-{name:'MM',description:'hahah',url:'https://mm.com',risk:'HIGH'},
-{name:'PP',description:'hahah',url:'https://pp.com',risk:'LOW'},
-{name:'FF',description:'hahah',url:'https://ff.com',risk:'NOT IMPORTANT'},
-{name:'MM',description:'hahah',url:'https://mm.com',risk:'HIGH'},
-{name:'PP',description:'hahah',url:'https://pp.com',risk:'LOW'},
-{name:'FF',description:'hahah',url:'https://ff.com',risk:'NOT IMPORTANT'},
-{name:'MM',description:'hahah',url:'https://mm.com',risk:'HIGH'},
-{name:'PP',description:'hahah',url:'https://pp.com',risk:'LOW'},
-{name:'FF',description:'hahah',url:'https://ff.com',risk:'NOT IMPORTANT'},
 
-
-];
 
 function populateTable(data) {
   const table = document.getElementById('rules-table');
-  
-  data.forEach(item => {
+
+  function processTableNode(item) {
     const row = document.createElement('div');
     row.className = 'table-row';
 
-    ['name', 'description', 'url', 'risk'].forEach(field => {
+    if (item.type === 'file') {
+      ['name', 'description', 'url', 'risk'].forEach(field => {
+        const cell = document.createElement('div');
+        cell.className = 'table-cell';
+        cell.textContent = item[field] || '';
+        row.appendChild(cell);
+      });
+      table.appendChild(row); // 添加行到表格
+    }
+
+    if (item.type === 'path') {
+      // 如果是路径节点，仅展示路径的信息或使用路径的名称
       const cell = document.createElement('div');
       cell.className = 'table-cell';
-      cell.textContent = item[field];
+      cell.textContent = `Path: ${item.url || item.name}`;
       row.appendChild(cell);
-    });
+      table.appendChild(row); // 添加行到表格
 
-    table.appendChild(row);
-  });
+      // 如果路径中包含文件或子路径，递归处理这些文件和路径
+      if (item.files && item.files.length > 0) {
+        item.files.forEach(file => processTableNode(file));
+      }
+
+      if (item.paths && item.paths.length > 0) {
+        item.paths.forEach(subPath => processTableNode(subPath));
+      }
+    }
+    
+  }
+
+  // 处理根对象的 files 和 paths 数组
+  if (data.files && data.files.length > 0) {
+    data.files.forEach(file => processTableNode(file));
+  }
+
+  if (data.paths && data.paths.length > 0) {
+    data.paths.forEach(path => processTableNode(path));
+  }
 }
 
 
-populateTable(hardCodeData);
 
 chrome.storage.local.get(['matches'], (result) => {
   if (result.matches) {
@@ -115,7 +123,8 @@ function processNode(node, nodes, edges, parentName = null) {
     id: nodeId,
     label: node.type === 'path' ? `Path: ${node.url}` : `File: ${node.name}`,
     title: node.name === 'file' ? `Description: ${node.description}\nRisk: ${node.risk}` : `URL: ${node.url}`,
-    color: node.type === 'path' ? 'lightblue' : 'pink'
+    color: node.type === 'path' ? 'lightblue' : 'pink',
+    url:node.url
   });
   // console.log(nodes)
   if (parentName) {
@@ -123,12 +132,13 @@ function processNode(node, nodes, edges, parentName = null) {
   }
   if (node.files && node.files.length > 0) {
     node.files.forEach(file => {
-      const fileNodeId = `${file.name}-${file.id}`;
+      const fileNodeId = `${file.id}`;
       nodes.push({
         id: fileNodeId,
         label: `File: ${file.name}`,
-        title: `Description: ${file.description}\nSource: ${file.source}\nRisk: ${file.risk}`,
-        color: file.type === 'path' ? 'lightblue' : 'pink'
+        title: `Description: ${file.description}\nSource: ${file.source}\nRisk: ${file.risk}\nURL: ${file.url}`,
+        color: file.type === 'path' ? 'lightblue' : 'pink',
+        url:file.url
       });
       // Create an edge from the current path node to this file
       edges.push({ from: nodeId, to: fileNodeId });
@@ -149,6 +159,8 @@ async function loadAndRenderTree() {
     console.log("Loaded rootNode from chrome.storage.local:", rootNode);
     if (rootNode) {
       renderTree(rootNode);
+      populateTable(rootNode)
+      
     }
   } catch (error) {
     console.warn(error);
