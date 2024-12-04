@@ -296,8 +296,28 @@ async function isValidURL(baseURL, path, timeout = 5000) {
     const response = await fetch(fullURL, { method: "HEAD", signal });
     clearTimeout(timeoutId); 
 
+    let versionInfo = null;
+
     if (response.ok || response.status === 403) {
       console.log(`ok ${fullURL}: ${response.status}`);
+      const serverHeader = response.headers.get("server");
+      if (serverHeader) {
+        console.log(`Server header found: ${serverHeader}`);
+        serverVersion = extractServerVersion(serverHeader);
+      }
+      const bodyResponse = await fetch(fullURL, { method: "GET", signal });
+      const bodyText = await bodyResponse.text();
+      cmsVersion = extractServerVersion(bodyText);
+
+      if (serverVersion) {
+        console.log(`Server version extracted: ${serverVersion}`);
+        recordVersionInfo(fullURL, serverVersion, "serverVersion");
+      }
+  
+      if (cmsVersion) {
+        console.log(`CMS version extracted: ${cmsVersion}`);
+        recordVersionInfo(fullURL, cmsVersion, "cmsVersion");
+      }
       return true;
     } else {
       console.log(`not ok ${fullURL}: ${response.status}`);
@@ -311,6 +331,67 @@ async function isValidURL(baseURL, path, timeout = 5000) {
     }
     return false;
   }
+}
+
+function extractServerVersion(text) {
+  const patterns = [
+    /<meta[^>]*name=["']?Generator["']?[^>]*content=["']?([\w\s.-]+) version ([\d.]+)/i, // Match meta generator tag
+    /powered by\s*([\w\s.-]+)\s*version\s*([\d.]+)/i,                                    // Match "powered by <name> version x.y.z"
+    /CMS Made Simple.*version\s*([\d.]+)/i,                                              // Match CMS Made Simple specifically
+    /(?:Apache|nginx|IIS|LiteSpeed|Caddy|Tomcat|Jetty|JBoss|Node\.js|Express|PHP)\/([\d.]+)/i, // Match server types including PHP
+    /PHP\/([\d.]+)/i,                                                                    // Match standalone PHP versions
+    /(?:powered by|version)\s*[^\d]*([\d.]+)/i,                                          // General "powered by" or "version x.y.z" pattern
+    /\bCMS Made Simple\b.*?([\d.]+)/i,                                                  // Match "CMS Made Simple version x.y.z"
+    /Apache\/([\d.]+)/i,                                                                 // Match Apache versions
+    /nginx\/([\d.]+)/i,                                                                  // Match nginx versions
+    /IIS\/([\d.]+)/i,                                                                    // Match IIS versions
+    /LiteSpeed\/([\d.]+)/i,                                                              // Match LiteSpeed versions
+    /Caddy\/([\d.]+)/i,                                                                  // Match Caddy versions
+    /OpenResty\/([\d.]+)/i,                                                              // Match OpenResty versions
+    /Tomcat\/([\d.]+)/i,                                                                 // Match Tomcat versions
+    /Jetty\/([\d.]+)/i,                                                                  // Match Jetty versions
+    /JBoss\/([\d.]+)/i,                                                                  // Match JBoss versions
+    /Node\.js\/([\d.]+)/i,                                                               // Match Node.js versions
+    /Express\/([\d.]+)/i,                                                                // Match Express versions
+    /\bDrupal\s*([\d.]+)/i,                                                              // Match Drupal versions
+    /\bWordPress\s*([\d.]+)/i,                                                           // Match WordPress versions
+    /\bJoomla!\s*([\d.]+)/i,                                                             // Match Joomla! versions
+    /\bMagento\s*([\d.]+)/i,                                                             // Match Magento versions
+    /\bShopify\s*([\d.]+)/i,                                                             // Match Shopify versions
+    /\bPrestashop\s*([\d.]+)/i                                                           // Match Prestashop versions
+  ];
+
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) {
+      return match[0]; // Return the first matched version string
+    }
+  }
+
+  return null; // No version information found
+}
+
+
+
+function recordVersionInfo(url, version, type) {
+  const key = type === "serverVersion" ? "serverVersions" : "cmsVersions";
+
+  chrome.storage.local.get({ [key]: [] }, (data) => {
+    const updatedVersions = data[key];
+
+    // Avoid duplicate entries for the same URL and version
+    const alreadyExists = updatedVersions.some(
+      (entry) => entry.url === url && entry.version === version
+    );
+
+    if (!alreadyExists) {
+      updatedVersions.push({ url, version });
+
+      chrome.storage.local.set({ [key]: updatedVersions }, () => {
+        console.log(`Saved ${type}: ${url} -> ${version}`);
+      });
+    }
+  });
 }
 
 
@@ -330,7 +411,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (tab.status === "complete") {
         const url = new URL(tab.url);
         const baseURL = url.origin; // Get only the protocol and hostname part
+        const path = url.pathname;  // Get the path part
         console.log("Base URL:", baseURL);
+        chrome.storage.local.set({ baseURL }, () => {
+          console.log("Base URL saved to chrome.storage.local:", baseURL);
+        });
+        console.log("path:", path);
+        await isValidURL(baseURL, path); // check the current page
         await checkUrls(baseURL);
         sendResponse({ status: "checkUrls started" });
       } else {

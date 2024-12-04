@@ -39,6 +39,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (progressElement) progressElement.textContent = `Progress: ${message.progress}`;
     }
 });
+
+function clearVersionStorage() {
+    chrome.storage.local.remove(['serverVersions', 'cmsVersions'], () => {
+      console.log('Cleared serverVersions and cmsVersions from local storage.');
+    });
+  }
   
 
 document.addEventListener('DOMContentLoaded', init_main);
