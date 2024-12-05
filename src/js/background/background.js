@@ -283,8 +283,6 @@ async function removeUnworkedUrl(baseURL, rootNode) {
 }
 
 
-
-
 async function isValidURL(baseURL, path, timeout = 5000) {
   const fullURL = `${baseURL}/${path}`;
   const controller = new AbortController();
@@ -295,8 +293,6 @@ async function isValidURL(baseURL, path, timeout = 5000) {
   try {
     const response = await fetch(fullURL, { method: "HEAD", signal });
     clearTimeout(timeoutId); 
-
-    let versionInfo = null;
 
     if (response.ok || response.status === 403) {
       console.log(`ok ${fullURL}: ${response.status}`);
