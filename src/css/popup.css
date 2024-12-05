@@ -1,0 +1,90 @@
+#container{
+    width:200px;
+    height:200px;
+    background-image: url('../img/logo.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    justify-content: flex-start; 
+    align-items: center;  
+    position: relative;
+    flex-direction: column;
+    gap: 34px;
+}
+
+#container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.4); 
+    z-index: 1;
+}
+
+#container > * {
+    position: relative;
+    z-index: 2;
+}
+#gradient-button {
+    background: linear-gradient(45deg, #f8b6a2, #ffffff, #b0e4de);
+    border: none;
+    color: white;
+    width: 100px;
+    height: 40px;
+    font-size: 16px;
+    border-radius: 20px;
+    text-align: center;
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: -30px;
+    cursor: pointer;
+    transition: background 0.3s;
+    text-shadow: 
+        -1px -1px 0 #333, 
+        1px -1px 0 #333,  
+        -1px 1px 0 #333,  
+        1px 1px 0 #333;  
+}
+#gradient-button:hover {
+    background: linear-gradient(45deg, #f8b6a2, #b0e4de);
+}
+
+
+#checkUrlsButton{
+    background: linear-gradient(45deg, #f8b6a2, #ffffff, #b0e4de);
+    border: none;
+    color: white;
+    width: 100px;
+    height: 40px;
+    font-size: 16px;
+    border-radius: 20px;
+    text-align: center;
+    text-align: center;
+    margin-bottom: -30px;
+    cursor: pointer;
+    transition: background 0.3s;
+    text-shadow: 
+        -1px -1px 0 #333, 
+        1px -1px 0 #333,  
+        -1px 1px 0 #333,  
+        1px 1px 0 #333;  
+}
+
+#checkUrlsButton:hover{
+    background: linear-gradient(45deg, #f8b6a2, #b0e4de);
+}
+
+
+#progressDisplay{
+    display: block; 
+    font-size: 16px;
+    color: white;
+    text-shadow: 
+        -1px -1px 0 #333, 
+        1px -1px 0 #333,  
+        -1px 1px 0 #333,  
+        1px 1px 0 #333;  
+}
