@@ -39,7 +39,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (progressElement) progressElement.textContent = `Progress: ${message.progress}`;
     }
     if (message.action === "PhishingUpdate") {
-        const progressElement = document.getElementById("PhishingDisplay");
+        const progressElement = document.getElementById("phishingDisplay");
 
         if (progressElement) progressElement.textContent = message.is_phishing;
     }
