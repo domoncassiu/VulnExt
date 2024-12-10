@@ -7,7 +7,7 @@ function init_main() {
 let baseUrl = "";
 
 async function checkPhishingWebsite() {
-  const apiUrl = "http://127.0.0.1:5000/check"; // Replace with your actual API endpoint
+  const apiUrl = "http://127.0.0.1:5000/predict"; // Replace with your actual API endpoint
   console.log("API URL:", apiUrl); // Debugging log
 
   try {
