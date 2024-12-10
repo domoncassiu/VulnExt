@@ -1,6 +1,7 @@
 #container{
     width:200px;
     height:200px;
+    background-image: url('../img/logo.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -90,7 +91,7 @@
 
 
 #phishingDisplay{
-    margin-top: 5px;
+    margin-top: -30px;
     display: block; 
     font-size: 16px;
     color: white;
