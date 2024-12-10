@@ -20,7 +20,7 @@ async function checkPhishingWebsite() {
       });
 
       const data = await response.json();
-      alert(`The website is likely ${data.is_phishing ? "a phishing site" : "safe"}.`);
+      alert(`The website is likely ${data.prediction === "1" ? "a phishing site" : "safe"}.`);
   } catch (error) {
       console.error("Error calling phishing API:", error);
       alert("Failed to check the website. Please try again later.");
