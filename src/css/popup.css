@@ -77,27 +77,28 @@
     background: linear-gradient(45deg, #f8b6a2, #b0e4de);
 }
 
-
-#progressDisplay{
-    display: block; 
-    font-size: 16px;
-    color: white;
-    text-shadow: 
-        -1px -1px 0 #333, 
-        1px -1px 0 #333,  
-        -1px 1px 0 #333,  
-        1px 1px 0 #333;  
+#progressDisplay {
+    display: block;
+    font-size: 18px; /* Increase font size for better visibility */
+    font-weight: bold; /* Make the text bold */
+    color: #f8f9fa; /* Light color for better contrast */
+    text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.8), 
+                 0px 0px 6px rgba(0, 0, 0, 0.5); /* Add glow effect for visibility */
+    text-align: center; /* Center-align text */
+    margin-top: 10px; /* Add spacing */
+    line-height: 1.5; /* Improve readability */
 }
 
 
 #phishingDisplay{
     margin-top: -30px;
-    display: block; 
-    font-size: 16px;
-    color: white;
-    text-shadow: 
-        -1px -1px 0 #333, 
-        1px -1px 0 #333,  
-        -1px 1px 0 #333,  
-        1px 1px 0 #333;  
+    display: block;
+    font-size: 18px; /* Increase font size for better visibility */
+    font-weight: bold; /* Make the text bold */
+    color: #f8f9fa; /* Light color for better contrast */
+    text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.8), 
+                 0px 0px 6px rgba(0, 0, 0, 0.5); /* Add glow effect for visibility */
+    text-align: center; /* Center-align text */
+    margin-top: 10px; /* Add spacing */
+    line-height: 1.5; /* Improve readability */
 }
