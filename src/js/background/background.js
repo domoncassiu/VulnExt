@@ -390,6 +390,29 @@ function recordVersionInfo(url, version, type) {
   });
 }
 
+async function checkPhishingWebsite(baseUrl) {
+  const apiUrl = "http://127.0.0.1:5000/predict"; // Replace with your actual API endpoint
+  console.log("API URL:", apiUrl); // Debugging log
+
+  try {
+      const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ url: baseUrl })
+      });
+
+      const data = await response.json();
+      alert(`The website is likely ${data.prediction === "1" ? "a phishing site" : "safe"}.`);
+  } catch (error) {
+      console.error("Error calling phishing API:", error);
+      alert("Failed to check the website. Please try again later.");
+  } finally {
+      button.disabled = false;
+      button.textContent = "Check Phishing Website";
+  }
+}
 
 
 
@@ -413,6 +436,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           console.log("Base URL saved to chrome.storage.local:", baseURL);
         });
         console.log("path:", path);
+        await checkPhishingWebsite(baseURL);
         await isValidURL(baseURL, path); // check the current page
         await checkUrls(baseURL);
         sendResponse({ status: "checkUrls started" });
