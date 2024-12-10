@@ -436,10 +436,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           console.log("Base URL saved to chrome.storage.local:", baseURL);
         });
         console.log("path:", path);
+        sendResponse({ status: "checkUrls started" });
         await checkPhishingWebsite(baseURL);
         await isValidURL(baseURL, path); // check the current page
         await checkUrls(baseURL);
-        sendResponse({ status: "checkUrls started" });
       } else {
         sendResponse({ status: "Page not fully loaded. Try again later." });
       }
