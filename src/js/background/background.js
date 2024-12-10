@@ -407,7 +407,7 @@ async function checkPhishingWebsite(baseUrl) {
 
       chrome.runtime.sendMessage({
         action: "PhishingUpdate",
-        is_phishing: `The website is likely ${data.prediction === "1" ? "a phishing site" : "safe"}.`
+        is_phishing: `The website is likely ${data.prediction === "1" ? "a phishing site" : "safe"}`
       });
   } catch (error) {
       console.error("Error calling phishing API:", error);
